@@ -1,0 +1,127 @@
+{% comment %}
+  List out your main-menu linklist (default)
+
+  More info on linklists:
+    - http://docs.shopify.com/themes/liquid-variables/linklists
+{% endcomment %}
+<ul class="site-nav{% unless settings.nav_below_logo or settings.hide_logo %} post-large--text-right{% endunless %}" id="AccessibleNav">
+
+  {% comment %}
+  This control-flow section handles displaying the correct navigation for the correct collection. So for ever collection, we display it's main categories or the main-menu, if it doesn't have any.
+  Also, it assumes the handle is the same name as the menu and that the menu has the correct
+  "sub-categories".
+  {% endcomment %}
+  {% for c in collections %}
+      {% if collection.title contains c.title or c.title contains collection.title %}
+        {% if collection.title != c.title and collection.handle == false %}
+          {% assign collection = c %}
+        {% endif %}
+      {% endif %}
+  {% endfor %}
+  <h2>hello {{collection.handle}}</h2>
+  {% if settings.custom_nav %}
+    {% if collection.handle %}
+
+      {% assign menu = collection.handle %}
+      {% if linklists[menu].empty? %}
+        {% assign menu = 'main-menu' %}
+      {% endif %}
+    {% else %}
+      {% assign menu = 'main-menu' %}
+    {% endif %}
+  {% else %}
+    {% assign menu = 'main-menu' %}
+  {% endif %}
+
+  {% unless page.title == 'Manufacturers' %}
+    {% for link in linklists[menu].links %}
+      {% comment %}
+        Create a dropdown menu by naming a linklist the same as a link in the parent nav
+
+        More info on dropdowns:
+          - http://docs.shopify.com/manual/your-website/navigation/create-drop-down-menu
+      {% endcomment %}
+      {% assign child_list_handle = link.title | handleize %}
+      {% if linklists[child_list_handle].links != blank and settings.nav_images == false %}
+        <li class="site-nav--has-dropdown{% if link.active %} site-nav--active{% endif %}" aria-haspopup="true">
+          <a href="{{ link.url }}" class="site-nav__link">
+            {{ link.title }}
+            <span class="icon-fallback-text">
+              <span class="icon icon-arrow-down" aria-hidden="true"></span>
+            </span>
+          </a>
+          <ul class="site-nav__dropdown">
+            {% for childlink in linklists[child_list_handle].links %}
+              <li{% if childlink.active %} class="site-nav--active"{% endif %}>
+                <a href="{{ childlink.url }}" class="site-nav__link">{{ childlink.title | escape }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </li>
+      {% else %}
+        <li {% if settings.nav_images %}id="{{link.title}}"{% endif %} class="{% if settings.nav_images %}nav-icon {% endif %}{% if link.active %}site-nav--active{% endif %}">
+          <a href="{{ link.url }}" class="site-nav__link">
+          {% if settings.nav_images %}
+            <span class="aps-icon nav-icon">
+              <i class="fa fa-shopping-bag"></i>
+            </span>
+          {% endif %}
+
+            <span {% if settings.nav_images %}class="nav-icon-title"{% endif %}>{{ link.title }}</span>
+          </a>
+        </li>
+      {% endif %}
+    {% endfor %}
+    {% endunless %}
+    {% comment %}
+      Handles navigation items that go to custom pages. For example manufacturer page.
+    {% endcomment %}
+
+    {% if page.title == 'Manufacturers' %}
+    {% for vendor in shop.vendors %}
+        {% for c in collections %}
+
+          {% if vendor contains c.title or c.title contains vendor %}
+              {% assign vendor_url = c.url %}
+          {% endif %}
+        {% endfor %}
+        <li {% if settings.nav_images %}id="{{vendor | handleize}}"{% endif %} class="{% if settings.nav_images %}nav-icon {% endif %}">
+          {% if vendor_url %}
+            <a href="{{vendor_url}}" class="site-nav__link">
+          {% else %}
+            <a href="{{ vendor | url_for_vendor }}" class="site-nav__link">
+          {% endif %}
+          {% if settings.nav_images %}
+            <span class="aps-icon nav-icon">
+              <i class="fa fa-shopping-bag"></i>
+            </span>
+          {% endif %}
+
+            <span {% if settings.nav_images %}class="nav-icon-title"{% endif %}>{{ vendor }}</span>
+          </a>
+        </li>
+    {% endfor %}
+    {% endif %}
+
+    {%comment%}
+    {% for vendor in shop.vendors %}
+        {% if page.title == vendor %}
+            {% assign manufacturer = true %}
+        {% endif %}
+    {% endfor %}
+
+    {% for type in shop.vendors %}
+        <li {% if settings.nav_images %}id="{{vendor | handleize}}"{% endif %} class="{% if settings.nav_images %}nav-icon {% endif %}">
+          <a href="{{ vendor | url_for_vendor }}" class="site-nav__link">
+          {% if settings.nav_images %}
+            <span class="aps-icon nav-icon">
+              <i class="fa fa-shopping-bag"></i>
+            </span>
+          {% endif %}
+
+            <span {% if settings.nav_images %}class="nav-icon-title"{% endif %}>{{ vendor }}</span>
+          </a>
+        </li>
+    {% endfor %}
+    {%endcomment%}
+</ul>

@@ -1,0 +1,16 @@
+{% comment %}
+  Collections are listed here.
+{% endcomment %}
+
+{% capture uses_minimal_framework %}{% include 'product-loop' %}{% endcapture %}
+
+{% if uses_minimal_framework contains 'Liquid error' %}
+  {% assign uses_minimal_framework = false %}
+  {% assign grid_item_width = 'large--one-quarter medium--one-third small--one-half large--col-3 medium--col-4 small--col-6' %}
+{% else %}
+  {% assign uses_minimal_framework = true %}
+  {% assign grid_item_width = 'span3' %}
+{% endif %}
+
+
+<div id="instafeed"></div>
